@@ -1,0 +1,148 @@
+<main class="page-shell">
+  <section class="hero-card">
+    <div class="hero-copy">
+      <p class="eyebrow">Sydney bakery ordering</p>
+      <h1>{{ bakeryName }}</h1>
+      <p class="subtitle">
+        Browse cupcakes, cookies, and cakes, choose your favourite treat, and launch a
+        Sydney-only payment flow powered by our FastAPI checkout service.
+      </p>
+    </div>
+
+    <div class="location-badge">
+      <span>Payments enabled</span>
+      <strong>Sydney, Australia only</strong>
+    </div>
+  </section>
+
+  <section class="content-grid">
+    <article class="catalog-card">
+      <div class="section-heading">
+        <h2>Pick a category</h2>
+        <p>Select the bakery category you want to explore.</p>
+      </div>
+
+      <div class="category-tabs">
+        @for (category of categories(); track category.slug) {
+          <button
+            type="button"
+            class="category-tab"
+            [class.active]="category.slug === selectedCategory()"
+            (click)="selectCategory(category.slug)"
+          >
+            {{ category.label }}
+          </button>
+        }
+      </div>
+
+      @if (loading()) {
+        <p class="status-text">Loading bakery items…</p>
+      } @else if (activeCategory(); as category) {
+        <div class="item-list">
+          @for (item of category.items; track item.id) {
+            <button
+              type="button"
+              class="item-card"
+              [class.selected]="item.id === selectedItemId()"
+              (click)="selectItem(item.id)"
+            >
+              <div>
+                <h3>{{ item.name }}</h3>
+                <p>{{ item.description }}</p>
+              </div>
+              <span>AUD {{ item.price }}</span>
+            </button>
+          }
+        </div>
+      }
+    </article>
+
+    <article class="checkout-card">
+      <div class="section-heading">
+        <h2>Checkout</h2>
+        <p>Only customers in Sydney, NSW can complete payment right now.</p>
+      </div>
+
+      @if (selectedItem(); as item) {
+        <div class="selection-summary">
+          <span class="summary-label">Selected item</span>
+          <strong>{{ item.name }}</strong>
+          <p>{{ item.description }}</p>
+          <span class="price-pill">AUD {{ item.price }} each</span>
+        </div>
+      }
+
+      <form class="checkout-form" (ngSubmit)="checkout()">
+        <label>
+          <span>Name</span>
+          <input
+            type="text"
+            name="customer_name"
+            [ngModel]="checkoutForm().customer_name"
+            (ngModelChange)="updateField('customer_name', $event)"
+            placeholder="Your name"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Quantity</span>
+          <input
+            type="number"
+            name="quantity"
+            min="1"
+            max="12"
+            [ngModel]="checkoutForm().quantity"
+            (ngModelChange)="updateField('quantity', +$event)"
+            required
+          />
+        </label>
+
+        <label>
+          <span>City</span>
+          <input
+            type="text"
+            name="city"
+            [ngModel]="checkoutForm().city"
+            (ngModelChange)="updateField('city', $event)"
+            required
+          />
+        </label>
+
+        <label>
+          <span>State</span>
+          <input
+            type="text"
+            name="state"
+            [ngModel]="checkoutForm().state"
+            (ngModelChange)="updateField('state', $event)"
+            required
+          />
+        </label>
+
+        <label>
+          <span>Country</span>
+          <input
+            type="text"
+            name="country"
+            [ngModel]="checkoutForm().country"
+            (ngModelChange)="updateField('country', $event)"
+            required
+          />
+        </label>
+
+        <button type="submit" class="pay-button" [disabled]="submitting() || loading()">
+          {{ submitting() ? 'Starting payment…' : 'Proceed to payment gateway' }}
+        </button>
+      </form>
+
+      @if (errorMessage()) {
+        <p class="feedback error">{{ errorMessage() }}</p>
+      }
+
+      @if (successMessage()) {
+        <p class="feedback success">{{ successMessage() }}</p>
+      }
+    </article>
+  </section>
+</main>
